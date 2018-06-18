@@ -78,6 +78,7 @@
         headerStyle: "tableHead",
         alternatingRowStyle: "altRow",
         columns: grid.Columns(
+            grid.Column(format: @<a href="~/EditMovie?id=@item.ID">Edit</a>),
             grid.Column("Title"),
             grid.Column("Genre"),
             grid.Column("Year")
