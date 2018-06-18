@@ -1,7 +1,24 @@
 ﻿@{
-    var db = Database.Open("MovieLibrary");
-    var selectedData = db.Query("SELECT * FROM Movies");
-    var grid = new WebGrid(source: selectedData, rowsPerPage: 3);
+    Database db = Database.Open("MovieLibrary");
+    string selectCommand = "SELECT * FROM Movies";
+    string searchTerm = "";
+
+    if (!Request.QueryString["searchGenre"].IsEmpty())
+    {
+        searchTerm = Request.QueryString["searchGenre"];
+        selectCommand = "SELECT * FROM Movies WHERE Genre = @0";
+    }
+
+    if (!Request.QueryString["searchTitle"].IsEmpty())
+    {
+        selectCommand = "SELECT * FROM Movies WHERE title LIKE @0";
+        searchTerm = $"%{Request.QueryString["searchTitle"]}%";
+    }
+
+    var selectedData = db.Query(selectCommand, searchTerm);
+
+    WebGrid grid = new WebGrid(source: selectedData, rowsPerPage: 3);
+
 }
 
 <!DOCTYPE html>
@@ -42,6 +59,20 @@
 </head>
 <body>
     <h1>Movies</h1>
+    <form method="get">
+        <div>
+            <label for="searchGenre">Genre to look for:</label>
+            <input type="text" name="searchGenre" value="@Request.QueryString["searchGenre"]" />
+            <input type="submit" value="Search Genre" /><br />
+            (Leave Blank to list all movies.)<br />
+        </div>
+        <div>
+            <label for="searchTitle">Movie Title contains the following:</label>
+            <input type="text" name="searchTitle" value="@Request.QueryString["searchTitle"]" />
+            <input type="submit" value="Search Title" /><br />
+        </div>
+    </form>
+
     @grid.GetHtml(
         tableStyle: "grid",
         headerStyle: "tableHead",
